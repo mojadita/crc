@@ -4,7 +4,7 @@
 
 libname="$1"
 
-echo -n "${libname}_objs = \\"
+echo -n "${libname}_objs ="
 
 for i in $(mkcrc -L)
 do
