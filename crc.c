@@ -55,12 +55,12 @@ CRC_STATE add_crc(
 {
 	int i;
 	CRC_STATE res;
-	nbytes -= ncrc;
+
 	state = do_crc(state, buff, nbytes, table);
 	buff += nbytes;
 	res = state;
 	for (i = 0; i < ncrc; i++) {	
-		*buff++ = state & 0xff;
+		*buff++ ^= state & 0xff;
 		state >>= 8;
 	} /* for */
 	return res;

@@ -14,7 +14,7 @@ clean:
 		$(test_crchash_objs) \
 		mkcrc libcrc.mk
 
-libcrc.a: libcrc.mk
+libcrc.a: libcrc.mk crc.[ch] mkcrc fprintbuf.[ch] 
 	$(MAKE) -f libcrc.mk
 
 libcrc.mk: mkcrc mkdeps.sh
