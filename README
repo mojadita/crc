@@ -1,0 +1,8 @@
+This is a crc lib to allow to calculate efficiently CRCs of almost
+all classes.  Most polynomials have been obtained from the Wikipedia.
+Sorry if some of them are misspeled.
+
+It allows you to generate new tables based on new CRC polinomials.
+
+Sorry, documentation is at this moment in my head... I'll try to
+write down it soon. :)
