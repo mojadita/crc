@@ -41,14 +41,10 @@ crc8ccitt.c
 crc8dallas.c
 crc8saej1850.c
 crc8wcdma.c
-crc_table.o
-crchash.o
 crctables.c
 libcrc.a
 libcrc.mk
 mkcrc
-mkcrc.o
 test_crc
-test_crc.o
 test_crchash
-test_crchash.o
+*.o
