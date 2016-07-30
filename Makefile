@@ -4,6 +4,7 @@
 .PHONY: all clean
 
 targets = test_crc test_crchash
+RM = rm -f
 
 all: $(targets)
 clean:
@@ -37,4 +38,3 @@ test_crchash: $(test_crchash_objs)
 	$(CC) $(LDFLAGS) -o $@ $(test_crchash_objs)
 
 test_crc.o: crc.h
-

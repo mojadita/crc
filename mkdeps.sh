@@ -14,6 +14,7 @@ done
 cat <<EOF
 
 targets = ${libname}.a
+RM = rm -f
 
 all: \$(targets)
 clean:
@@ -25,16 +26,13 @@ clean:
 		mkcrc -g -p \$\${i} > \$\${i}.c; \\
 	done
 
-${libname}.a: ${libname}.a(\$(${libname}_objs)) \\
-	${libname}.a(crctables.o crc.o fprintbuf.o)
+${libname}.a: ${libname}.a(\$(${libname}_objs) crctables.o crc.o fprintbuf.o)
+	ar -r \$@ \$?
+	ranlib \$@
 
-${libname}.a(crc.o): crc.h
-${libname}.a(fprintbuf.o): fprintbuf.h
+crc.o: crc.h
+fprintbuf.o: fprintbuf.h
 
 crctables.c: mkcrctab.sh
 	mkcrctab.sh > \$@
-
 EOF
-
-	
-
