@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 {
 
 	static CRC_BYTE buffer[NN];
-	struct crc_table_s *p = crcs_table;
+    struct crc_table_s *p = NULL;
 	int N = 0;
 	CRC_STATE m = 0;
 	int opt;
@@ -60,12 +60,15 @@ int main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "p:")) != EOF) {
 		switch(opt) {
 		case 'p':
-			for (p = crcs_table; p->cr_name; p++)
-				if (!strcasecmp(p->cr_name, optarg)) break;
-			if (!p->cr_name) p = crcs_table;
-			break;
+            {   int i;
+                for (i = 0; crcs_table[i]; i++)
+                    if (!strcasecmp(crcs_table[i]->cr_name, optarg)) break;
+                if (crcs_table[i]) p = crcs_table[i];
+            } break;
 		} /* switch */
 	} /* while */
+
+    if (!p) p = crcs_table[0];
 
 	argc -= optind; argv += optind;
 

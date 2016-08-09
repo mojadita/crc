@@ -36,13 +36,17 @@ static char CRC_H_RCSId[] = "\n$Id: crc.h,v 2.1 2005/11/05 17:51:35 luis Exp $\n
 /* types */
 typedef unsigned char CRC_BYTE;
 typedef unsigned long long CRC_STATE;
-typedef CRC_STATE CRC_TABLE[CRC_TABLE_SIZE];
+typedef struct crc_table_s {
+	char      *cr_name;
+    char      *cr_strpolin;
+    size_t     cr_size;
+    size_t     cr_bytesize;
+    CRC_STATE  cr_polin;
+    CRC_STATE  cr_mask;
+	CRC_STATE  cr_table[CRC_TABLE_SIZE];
+} *CRC_TABLE;
 
 /* prototypes */
-
-size_t msbpos(CRC_STATE state);
-CRC_STATE msbmask(CRC_STATE state);
-char *pol2str(CRC_STATE pol, char *buffer, size_t bufsz);
 
 CRC_STATE do_crc(
 	CRC_STATE  state,
@@ -53,18 +57,10 @@ CRC_STATE do_crc(
 CRC_STATE add_crc(
 	CRC_STATE  state,
 	CRC_BYTE  *buff,
-	size_t ncrc);
+	size_t     nbytes,
+    CRC_TABLE  table);
 
-struct crc_table_s {
-	char      *cr_name;
-    char      *cr_strpol;
-    size_t     cr_size;
-    CRC_STATE  cr_polin;
-    CRC_STATE  cr_mask;
-	CRC_TABLE  cr_table;
-};
-
-extern struct crc_table_s *crcs_table[];
+extern CRC_TABLE *crc_alltables[];
 
 #endif /* CRC_H */
 /* Do not include anything AFTER the line above, as it would not be

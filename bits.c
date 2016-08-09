@@ -18,7 +18,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "crc.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "bits.h"
 
 #define SIZE (sizeof(CRC_STATE)*8)
 
@@ -77,3 +81,9 @@ char *pol2str(CRC_STATE p, char *buffer, size_t left)
 #undef ACT
 	return res;
 } /* pol2str */
+
+CRC_STATE slow_do_crc(int n, CRC_STATE v, CRC_STATE p)
+{
+	while (n--) v = (v >> 1) ^ (v & 1 ? p : 0);
+	return v;
+} /* slow_do_crc */

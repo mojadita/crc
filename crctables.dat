@@ -1,4 +1,10 @@
-0x0000000000000001	crc01
+# table of crc polinomials, mainly based on wikipedia page.
+# Author: Luis Colorado <luiscoloradourcola@gmail.com>
+# Date: Tue Aug  9 09:28:58 EEST 2016
+# This code is to generate the different CRC tables from
+# their encoded polinomials.
+#
+0x0000000000000001	crc01           # parity even.
 0x000000000000000c	crc04itu
 0x0000000000000012	crc05epc
 0x0000000000000014	crc05usb
@@ -18,6 +24,7 @@
 0x0000000000000c8f	crc12cdma2000
 0x0000000000000f01	crc12
 0x00000000000015e7	crc13bbc
+0x0000000000006051  crc15ibm
 0x0000000000004cd1	crc15can
 0x000000000000540b	crc15mpt1327
 0x0000000000008408	crc16ccitt
@@ -33,10 +40,10 @@
 0x0000000000d3b6ba	crc24
 0x0000000000df3261	crc24radix64
 0x0000000038e74301	crc30
-0x0000000082f63b78	crc32c
+0x0000000082f63b78	crc32castagnolli
 0x00000000d5828281	crc32q
 0x00000000eb31d82e	crc32k
-0x00000000edb88320	crc32
+0x00000000edb88320	crc32ieee802_3      # ethernet crc.
 0x0000009000412000	crc40gsm
 0xc96c5795d7870f42	crc64ecma
 0xd800000000000000	crc64iso

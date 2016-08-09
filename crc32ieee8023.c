@@ -30,7 +30,7 @@ static char CRC32IEEE8023_C_RCSId[]="\n$Id: crc32ieee8023.c,v 2.1 2005/11/05 17:
 
 CRC_TABLE crc32ieee8023 = {
 	/* Comando usado: mkcrc -gpedb88320 */
-	/* Polinomio: x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1 */
+	/* Polinomio: x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
 	/*   0 */ 0x0, 0x77073096, 0xee0e612c, 0x990951ba,
 	/*   4 */ 0x76dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
 	/*   8 */ 0xedb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,

@@ -1,8 +1,6 @@
 /* $Id: mkcrc.c,v 2.2 2005/11/07 23:22:18 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Nov  3 10:05:42 CET 2005
- * CONFIGURATION_ITEM: CPCI Controller Software(0141893320300)
- * CONFIGURATION_UNIT: Low Level OS Library (0141893321800)
  *
  * Disclaimer:
  *  This program is free software; you can redistribute it and/or modify
@@ -22,7 +20,10 @@
 
 #define IN_MKCRC_C
 
+#define F(fmt) "%s:%d:%s:" fmt, __FILE__, __LINE__, __func__
+
 /* Standard include files */
+#include <ctype.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -36,24 +37,20 @@
 
 #include "crc.h"
 #include "mkcrc.h"
+#include "bits.h"
 
 /* variables */
 
 int config_flags = 0;
 
 /* functions */
+static void do_usage(void);
+static int check_name(char *s);
+static inline long cycle(CRC_STATE p);
 
-void do_usage(void)
+static void do_usage(void)
 {
 } /* do_usage */
-
-
-static CRC_STATE calc(int n, CRC_STATE v, CRC_STATE p)
-{
-	while (n--) v = (v >> 1) ^ (v & 1 ? p : 0);
-
-	return v;
-} /* calc */
 
 static inline long cycle(CRC_STATE p)
 {
@@ -64,61 +61,62 @@ static inline long cycle(CRC_STATE p)
 
 	/* buscamos la repetición */
 	do {
-		v1 = calc(1, v1, p); /* iteramos una vez */
-		v2 = calc(2, v2, p); /* iteramos dos veces */
+		v1 = slow_do_crc(1, v1, p); /* iteramos una vez */
+		v2 = slow_do_crc(2, v2, p); /* iteramos dos veces */
 	} while (v1 != v2); /* hasta que uno alcance al otro */
 
 	do {
-		v2 = calc(1, v2, p); /* iteramos */
+		v2 = slow_do_crc(1, v2, p); /* iteramos */
 		res++;
 	} while (v1 != v2); /* hasta recorrer una vez el ciclo */
 	
 	return res;
 } /* cycle */
 
+static int check_name(char *s)
+{
+    if (!isalpha(*s) && *s != '_') return -1;
+    while (*++s)
+        if (!isalnum(*s) && *s != '_') return -1;
+    return 0;
+}
+
 /* main program */
 int main (int argc, char **argv)
 {
-
-	extern int optind;
-	extern char *optarg;
 	int opt;
-
 	CRC_STATE val;
-	CRC_STATE pol_mask = DEFAULT_POL;
+	CRC_STATE pol_mask = DEFAULT_POL_MASK;
 	CRC_STATE limite;
 	int conf_index = 0;
-	char name[256];
+	char name[256] = "";
 
-	while ((opt = getopt(argc, argv, "hp:lgvL")) != EOF) {
+	while ((opt = getopt(argc, argv, "hp:n:lgvL")) != EOF) {
 		switch(opt) {
 		case 'h': do_usage(); exit(0);
-		case 'p': { int i;
-			for (i = 0; crc_table[i].name; i++)
-				if (!strcmp(optarg, crc_table[i].name))
-					break;
-			if (crc_table[i].name) {
-				pol_mask = crc_table[i].pol;
-				snprintf(name, sizeof name, "%s", crc_table[i].name);
-			} else {
-				if (sscanf(optarg, "%llx", &pol_mask) != 1)
-					pol_mask = DEFAULT_POL;
-				snprintf(name, sizeof name, "pol_0x%llx", pol_mask);
-			} /* if */
-			break;
-		} /* block */
-		case 'l': config_flags |= FLAGS_LIST; break;
+        case 'n':
+            if (check_name(optarg)) {
+                fprintf(stderr, F("invalid name format: %s\n"), optarg);
+                exit(EXIT_FAILURE);
+            }
+            strncpy(name, optarg, sizeof name);
+            break;
+		case 'p':
+            if (sscanf(optarg, "%llx", &pol_mask) != 1) {
+                fprintf(stderr, F("invalid pol mask: %s\n"), optarg);
+                exit(EXIT_FAILURE);
+            }
+            if (check_name(optarg)) {
+                snprintf(name, sizeof name,
+                        "pol_%#llx", pol_mask);
+            }
+		    break;
 		case 'g': config_flags |= FLAGS_GEN; break;
 		case 'v': config_flags |= FLAGS_VERBOSE; break;
-		case 'L': config_flags |= FLAGS_LISTCRCS; break;
 		} /* switch */
 	} /* while */
 
-	limite = 0;
-	while (limite < pol_mask) {
-		limite <<= 1;
-		limite |= 1;
-	} /* while */
+	limite = msbmask(pol_mask);
 
 	if (config_flags & FLAGS_LIST) {
 		while (pol_mask <= limite) {
@@ -133,14 +131,9 @@ int main (int argc, char **argv)
 			printf("\n");
 			pol_mask++;
 		} /* for */
-	} else if (config_flags & FLAGS_LISTCRCS) {
-		int i;
-		for (i = 0; crc_table[i].name; i++) {
-			printf("%s\n",
-				crc_table[i].name);
-		}
 	} else if (config_flags & FLAGS_GEN) {
 		int i;
+        int size = msbpos(pol_mask);;
         char buffer[1024];
 
 		printf(
@@ -150,26 +143,29 @@ int main (int argc, char **argv)
 " *            All rights reserved.\n"
 " */\n");
 		printf("#include \"crc.h\"\n");
-		printf("struct crc_table_s %s = {\n", name);
+		printf("static struct crc_table_s _%s = {\n", name);
 
 		printf("\t/* Comando usado:");
 		for (i = 0; i < argc; i++) printf(" %s", argv[i]);
 		printf(" */\n");
-        printf("\t/* cr_name    : */ \"%s\",\n", name);
+        printf("\t/* cr_name    : */ \"%s\",\n",    name);
         printf("\t/* cr_strpolin: */ \"%s\",\n",
                 pol2str(pol_mask, buffer, sizeof buffer)); 
-        printf("\t/* cr_size    : */ %lu,\n", msbpos(pol_mask));
-        printf("\t/* cr_polin   : */ %#llx,\n", pol_mask);
-        printf("\t/* cr_mask    : */ %#llx,\n", msbmask(pol_mask));
+        printf("\t/* cr_size    : */ %lu,\n",       size);
+        printf("\t/* cr_bytesize: */ %lu,\n",       (size+7) / 8);
+        printf("\t/* cr_polin   : */ %#llx,\n",     pol_mask);
+        printf("\t/* cr_mask    : */ %#llx,\n",     limite);
         printf("\t/* cr_table[] : */ {\n");
 
 		for (val = 0; val < BYTE_VALUES; val++) {
 			if (val % N_PER_LINE == 0) printf("\t/* %3llu */", val);
-			printf(" 0x%llx,", calc(BITS_PER_BYTE, val, pol_mask));
+			printf(" 0x%llx,", slow_do_crc(BITS_PER_BYTE, val, pol_mask));
 			if (val % N_PER_LINE == N_PER_LINE - 1) printf("\n");
 		} /* for */
 		if (val % N_PER_LINE != 0) printf("\n");
 		printf("}}; /* %s */\n", name);
+        printf("\n");
+        printf("CRC_TABLE %s = &_%s;\n", name, name);
 
 	} /* if */
 

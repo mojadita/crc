@@ -29,10 +29,10 @@ static char CRC_C_RCSId[]="\n$Id: crc.c,v 2.1 2005/11/05 17:51:35 luis Exp $\n";
 
 /* FUNCIÓN DE CÁLCULO DE CRC POR TABLA */
 CRC_STATE do_crc(
-	CRC_STATE state,
-	CRC_BYTE *buff,
-	size_t nbytes,
-	CRC_TABLE table)
+	CRC_STATE  state,
+	CRC_BYTE  *buff,
+	size_t     nbytes,
+	CRC_TABLE  table)
 {
 	CRC_STATE index;
 
@@ -40,26 +40,29 @@ CRC_STATE do_crc(
 		state ^= *buff++;
 		index = state & CRC_BYTE_MASK;
 		state >>= CRC_BYTE_SIZE;
-		state ^= table[index];
+		state ^= table->cr_table[index];
 	} /* while */
 
 	return state;
 } /* do_crc */
 
 CRC_STATE add_crc(
-	CRC_STATE state,
-	CRC_BYTE *buff,
-	size_t ncrc)
+	CRC_STATE  state,
+	CRC_BYTE  *buff,
+	size_t     nbytes,
+    CRC_TABLE  table)
 {
 	int i;
-	CRC_STATE res;
+	CRC_STATE work = state;
 
-	res = state;
-	for (i = 0; i < ncrc; i++) {	
-		*buff++ ^= state & 0xff;
-		state >>= 8;
+    if(nbytes > table->cr_bytesize)
+        nbytes = table->cr_bytesize;
+	work &= table->cr_mask;
+	for (i = 0; i < nbytes; i++) {	
+		*buff++ ^= work & CRC_BYTE_MASK;
+		work >>= CRC_BYTE_SIZE;
 	} /* for */
-	return res;
+	return state;
 } /* add_crc */
 
 /* $Id: crc.c,v 2.1 2005/11/05 17:51:35 luis Exp $ */

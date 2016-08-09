@@ -3,38 +3,41 @@
 # Date: lun dic  1 19:20:05 EET 2014
 
 libname="$1"
-while read polin name <crctables.dat
-do
 
-echo -n "${libname}_objs ="
+tmpfile="/tmp/mkdeps-$$.dat"
+trap "rm -f $tmpfile" EXIT
+grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]' crctables.dat | sort >"$tmpfile"
 
-for i in $(mkcrc -L)
+unset CRC_TABLES
+while read polin name comment
 do
-	echo "	${i}.o \\"
-done 
+	CRC_TABLES="$CRC_TABLES ${name}"
+done <"$tmpfile"
+
+cat <<EOF
+# makefile for the creation of all the crc tables.
+# Author: Luis Colorado <luiscoloradourcola@gmail.com>
+# THIS FILE GENERATED AUTOMATICALLY, DON'T EDIT.
+# Date: $(LANG=C date)
+# Created-with: $0 $*
+# Copyright: (C) $(date +%Y) LUIS COLORADO SISTEMAS S.L.U.
+#            All rights reserved.
+
+tables_names =$CRC_TABLES
+
+tables_static_objs = \$(crc_tables_names:=.o)
+tables_dynamic_objs = \$(crc_tables_names:=.so)
+tables_sources = \$(crc_tables_names:=.c)
+
+EOF
+
+while read polin name comment
+do
+	echo "${name}.c: mkcrc"
+	echo "	mkcrc -g -p $polin -n $name > ${name}.c"
+	echo
+done <"$tmpfile"
 
 cat <<EOF
 
-targets = ${libname}.a
-RM = rm -f
-
-all: \$(targets)
-clean:
-	\$(RM) \$(targets) \$(${libname}_objs:.o=.c) crctables.c
-
-\$(${libname}_objs:.o=.c): mkcrc
-	for i in \$\$(mkcrc -L); \\
-	do \\
-		mkcrc -g -p \$\${i} > \$\${i}.c; \\
-	done
-
-${libname}.a: ${libname}.a(\$(${libname}_objs) crctables.o crc.o fprintbuf.o)
-	ar -r \$@ \$?
-	ranlib \$@
-
-crc.o: crc.h
-fprintbuf.o: fprintbuf.h
-
-crctables.c: mkcrctab.sh
-	mkcrctab.sh > \$@
-EOF
+\$(tables_static_objs) \$(tables_dynamic_objs): crc.h
