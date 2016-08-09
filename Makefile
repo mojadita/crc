@@ -30,7 +30,6 @@ all: $(targets)
 clean:
 	$(RM) $(targets) $(toclean)
 
-
 .SUFFIXES: .c .o .so .a
 
 .include "libcrc.mk"
@@ -49,7 +48,6 @@ toclean			+= $(tables_sources)
 $(lib_a): $(tables_static_objs)
 	ar r $@ $?
 	ranlib $@
-toclean			+= $(lib_a)
 
 $(lib_so): $(lib_soname)
 	$(LINK) $? $@
@@ -65,7 +63,7 @@ toclean			+= $(lib_so) $(lib_soname) $(lib_fullname)
 $(tables_static_objs) $(tables_dynamic_objs): crc.h
 
 mkcrc_objs = mkcrc.o bits.o
-toclean			+= $(mkcrc_objs)
+toclean			+= $(mkcrc_objs) mkcrc
 mkcrc: $(mkcrc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(mkcrc_objs)
 $(mkcrc_objs): crc.h bits.h
@@ -76,7 +74,7 @@ toclean			+= crc_alltables.{c,h,so,o}
 crc_alltables.o: crc_alltables.h
 
 test_crc_objs = test_crc.o fprintbuf.o libcrc.a 
-toclean			+= test_crc.o
+toclean			+= test_crc.o fprintbuf.o
 
 test_crc: $(test_crc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(test_crc_objs)
