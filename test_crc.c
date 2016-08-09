@@ -60,22 +60,22 @@ int main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "p:")) != EOF) {
 		switch(opt) {
 		case 'p':
-			for (p = crcs_table; p->name; p++)
-				if (!strcasecmp(p->name, optarg)) break;
-			if (!p->name) p = crcs_table;
+			for (p = crcs_table; p->cr_name; p++)
+				if (!strcasecmp(p->cr_name, optarg)) break;
+			if (!p->cr_name) p = crcs_table;
 			break;
 		} /* switch */
 	} /* while */
 
 	argc -= optind; argv += optind;
 
-	while (m <= p->table[0x80]) {
+	while (m <= p->cr_table[0x80]) {
 		N++; m <<= 8; m |= 0xff;
 	} /* while */
 
-	while(fgets(buffer, NN-N, stdin)) {
+	while(fgets((char *)buffer, NN-N, stdin)) {
 		CRC_STATE crc;
-		size_t l = strlen(buffer);
+		ssize_t l = strlen((const char *)buffer);
 		int i, col, nl = 0;
 
 		while((l > 0) && iscntrl(buffer[l-1])) --l;
@@ -85,10 +85,12 @@ int main(int argc, char **argv)
 		for (i = 0; i < N; i++)
 			buffer[l+i] = 0xff;
 
-		crc = m ^ add_crc(m, buffer, l, p->table, N);
+        m = do_crc(m, buffer, l, p->cr_table);
+
+		crc = m ^ add_crc(m, buffer + l, N);
 
 		fprintbuf(stdout, l + N, buffer, 
-			"%s[0x%0*llx] %.*s", p->name, N<<1, crc, l, buffer);
+			"%s[0x%0*llx] %.*s", p->cr_name, N<<1, crc, l, buffer);
 	} /* while */
 
 	return 0;

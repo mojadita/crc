@@ -49,15 +49,11 @@ CRC_STATE do_crc(
 CRC_STATE add_crc(
 	CRC_STATE state,
 	CRC_BYTE *buff,
-	size_t nbytes,
-	CRC_TABLE table,
 	size_t ncrc)
 {
 	int i;
 	CRC_STATE res;
 
-	state = do_crc(state, buff, nbytes, table);
-	buff += nbytes;
 	res = state;
 	for (i = 0; i < ncrc; i++) {	
 		*buff++ ^= state & 0xff;

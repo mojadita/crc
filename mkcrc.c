@@ -23,61 +23,34 @@
 #define IN_MKCRC_C
 
 /* Standard include files */
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
+#include <fcntl.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
+
 #include "crc.h"
 #include "mkcrc.h"
-
-/* constants */
-/* types */
-
-/* prototypes */
 
 /* variables */
 
 int config_flags = 0;
 
 /* functions */
+
 void do_usage(void)
 {
 } /* do_usage */
 
-int fprintpol(FILE *f, CRC_STATE p)
-{
-	int res = 0, n = 0;
-	CRC_STATE m;
-
-	/* calculamos el grado */
-	for (m = p; m; m >>= 1) n++;
-
-	res += fprintf(f, "x^%d", n--);
-	for (m = p; m; m >>= 1) {
-		if (m & 1)
-			res += fprintf(f,
-				  (n==1) ? "+x"
-				: (n==0) ? "+1"
-				: "+x^%d",
-				n);
-		n--;
-	} /* for */
-
-	return res;
-} /* fprintpol */
 
 static CRC_STATE calc(int n, CRC_STATE v, CRC_STATE p)
 {
-	int i;
-
-	for (i = 0; i < n; i++) {
-		if (v & 1) v = (v >> 1) ^ p;
-		else v >>= 1;
-	} /* for */
+	while (n--) v = (v >> 1) ^ (v & 1 ? p : 0);
 
 	return v;
 } /* calc */
@@ -154,8 +127,8 @@ int main (int argc, char **argv)
 			printf("%20llu: 0x%llx %s",
 				cy, pol_mask, (cy == limite) ? " OK" : "");
 			if ((cy == limite) || (config_flags & FLAGS_VERBOSE)) {
-				printf(" --> ");
-				fprintpol(stdout, pol_mask);
+                char buffer[1024];
+				printf(" --> %s", pol2str(pol_mask, buffer, sizeof buffer));
 			} /* if */
 			printf("\n");
 			pol_mask++;
@@ -168,6 +141,7 @@ int main (int argc, char **argv)
 		}
 	} else if (config_flags & FLAGS_GEN) {
 		int i;
+        char buffer[1024];
 
 		printf(
 "/* THIS FILE GENERATED AUTOMATICALLY, DON'T EDIT.\n"
@@ -176,23 +150,26 @@ int main (int argc, char **argv)
 " *            All rights reserved.\n"
 " */\n");
 		printf("#include \"crc.h\"\n");
-		printf("CRC_STATE %s[] = {\n", name);
+		printf("struct crc_table_s %s = {\n", name);
 
 		printf("\t/* Comando usado:");
 		for (i = 0; i < argc; i++) printf(" %s", argv[i]);
 		printf(" */\n");
-
-		printf("\t/* Polinomio: ");
-		fprintpol(stdout, pol_mask);
-		printf(" */\n");
+        printf("\t/* cr_name    : */ \"%s\",\n", name);
+        printf("\t/* cr_strpolin: */ \"%s\",\n",
+                pol2str(pol_mask, buffer, sizeof buffer)); 
+        printf("\t/* cr_size    : */ %lu,\n", msbpos(pol_mask));
+        printf("\t/* cr_polin   : */ %#llx,\n", pol_mask);
+        printf("\t/* cr_mask    : */ %#llx,\n", msbmask(pol_mask));
+        printf("\t/* cr_table[] : */ {\n");
 
 		for (val = 0; val < BYTE_VALUES; val++) {
-			if (val % N_PER_LINE == 0) printf("\t/* %3lu */", val);
+			if (val % N_PER_LINE == 0) printf("\t/* %3llu */", val);
 			printf(" 0x%llx,", calc(BITS_PER_BYTE, val, pol_mask));
 			if (val % N_PER_LINE == N_PER_LINE - 1) printf("\n");
 		} /* for */
 		if (val % N_PER_LINE != 0) printf("\n");
-		printf("}; /* %s */\n", name);
+		printf("}}; /* %s */\n", name);
 
 	} /* if */
 

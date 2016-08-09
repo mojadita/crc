@@ -3,6 +3,8 @@
 # Date: lun dic  1 19:20:05 EET 2014
 
 libname="$1"
+while read polin name <crctables.dat
+do
 
 echo -n "${libname}_objs ="
 

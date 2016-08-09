@@ -39,25 +39,32 @@ typedef unsigned long long CRC_STATE;
 typedef CRC_STATE CRC_TABLE[CRC_TABLE_SIZE];
 
 /* prototypes */
+
+size_t msbpos(CRC_STATE state);
+CRC_STATE msbmask(CRC_STATE state);
+char *pol2str(CRC_STATE pol, char *buffer, size_t bufsz);
+
 CRC_STATE do_crc(
-	CRC_STATE state,
-	CRC_BYTE *buff,
-	size_t nbytes,
-	CRC_TABLE table);
+	CRC_STATE  state,
+	CRC_BYTE  *buff,
+	size_t     nbytes,
+	CRC_TABLE  table);
 
 CRC_STATE add_crc(
-	CRC_STATE state,
-	CRC_BYTE *buff,
-	size_t nbytes,
-	CRC_TABLE table,
+	CRC_STATE  state,
+	CRC_BYTE  *buff,
 	size_t ncrc);
 
 struct crc_table_s {
-	char *name;
-	CRC_STATE *table;
+	char      *cr_name;
+    char      *cr_strpol;
+    size_t     cr_size;
+    CRC_STATE  cr_polin;
+    CRC_STATE  cr_mask;
+	CRC_TABLE  cr_table;
 };
 
-extern struct crc_table_s crcs_table[];
+extern struct crc_table_s *crcs_table[];
 
 #endif /* CRC_H */
 /* Do not include anything AFTER the line above, as it would not be

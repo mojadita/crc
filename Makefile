@@ -1,10 +1,12 @@
-# Author: Luis Colorado <lc@luiscoloradosistemas.com>
+# Author: Luis Colorado <luiscoloradourcola@gmail.com>
 # Date: vie nov 28 18:41:06 EET 2014
 
 .PHONY: all clean
 
 targets = test_crc test_crchash
 RM = rm -f
+
+.include "deps.mk"
 
 all: $(targets)
 clean:
@@ -16,12 +18,12 @@ clean:
 		mkcrc libcrc.mk
 
 libcrc.a: libcrc.mk crc.[ch] mkcrc fprintbuf.[ch] 
-	$(MAKE) -f libcrc.mk
+	$(MAKE) -C. -f libcrc.mk
 
 libcrc.mk: mkcrc mkdeps.sh
-	mkdeps.sh libcrc > $@
+	mkdeps.sh $* > $@
 
-mkcrc_objs = mkcrc.o crc_table.o
+mkcrc_objs = mkcrc.o crc_table.o bits.o
 
 mkcrc: $(mkcrc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(mkcrc_objs)
