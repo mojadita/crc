@@ -2,6 +2,7 @@
 *.so
 chakravarty.c
 crc01.c
+crc04itu.c
 crc05epc.c
 crc05itu.c
 crc05usb.c
@@ -21,6 +22,7 @@ crc12.c
 crc12cdma2000.c
 crc13bbc.c
 crc15can.c
+crc15ibm.c
 crc15mpt1327.c
 crc16arinc.c
 crc16ccitt.c
@@ -36,7 +38,9 @@ crc24radix64.c
 crc30.c
 crc32.c
 crc32c.c
+crc32castagnolli.c
 crc32ieee8023.o
+crc32ieee802_3.c
 crc32k.c
 crc32q.c
 crc40gsm.c

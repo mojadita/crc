@@ -2,14 +2,17 @@
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
 # Date: lun dic  1 19:20:05 EET 2014
 
+exec >libcrc.mk
+
 tmpfile="/tmp/mkdeps-$$.dat"
 trap "rm -f $tmpfile" EXIT
 
-grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]' crctables.dat | sort >"$tmpfile"
+grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*' crctables.dat | sort >"$tmpfile"
 
 unset CRC_TABLES
 while read polin name comment
 do
+    echo "$name" >&2
 	CRC_TABLES="$CRC_TABLES ${name}"
 done <"$tmpfile"
 
