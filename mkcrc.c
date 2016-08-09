@@ -91,7 +91,7 @@ int main (int argc, char **argv)
 	int conf_index = 0;
 	char name[256] = "";
 
-	while ((opt = getopt(argc, argv, "hp:n:lgvL")) != EOF) {
+	while ((opt = getopt(argc, argv, "hp:n:lgv")) != EOF) {
 		switch(opt) {
 		case 'h': do_usage(); exit(0);
         case 'n':
@@ -111,6 +111,7 @@ int main (int argc, char **argv)
                         "pol_%#llx", pol_mask);
             }
 		    break;
+        case 'l': config_flags |= FLAGS_LIST; break;
 		case 'g': config_flags |= FLAGS_GEN; break;
 		case 'v': config_flags |= FLAGS_VERBOSE; break;
 		} /* switch */
@@ -133,7 +134,7 @@ int main (int argc, char **argv)
 		} /* for */
 	} else if (config_flags & FLAGS_GEN) {
 		int i;
-        int size = msbpos(pol_mask);;
+        size_t size = msbpos(pol_mask);;
         char buffer[1024];
 
 		printf(
@@ -143,7 +144,7 @@ int main (int argc, char **argv)
 " *            All rights reserved.\n"
 " */\n");
 		printf("#include \"crc.h\"\n");
-		printf("static struct crc_table_s _%s = {\n", name);
+		printf("struct crc_table_s _%s = {\n", name);
 
 		printf("\t/* Comando usado:");
 		for (i = 0; i < argc; i++) printf(" %s", argv[i]);
@@ -151,8 +152,8 @@ int main (int argc, char **argv)
         printf("\t/* cr_name    : */ \"%s\",\n",    name);
         printf("\t/* cr_strpolin: */ \"%s\",\n",
                 pol2str(pol_mask, buffer, sizeof buffer)); 
-        printf("\t/* cr_size    : */ %lu,\n",       size);
-        printf("\t/* cr_bytesize: */ %lu,\n",       (size+7) / 8);
+        printf("\t/* cr_size    : */ %lu,\n",      (size_t)size);
+        printf("\t/* cr_bytesize: */ %lu,\n",      ((size_t)size+7) / 8);
         printf("\t/* cr_polin   : */ %#llx,\n",     pol_mask);
         printf("\t/* cr_mask    : */ %#llx,\n",     limite);
         printf("\t/* cr_table[] : */ {\n");

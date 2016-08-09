@@ -60,7 +60,7 @@ CRC_STATE add_crc(
 	size_t     nbytes,
     CRC_TABLE  table);
 
-extern CRC_TABLE *crc_alltables[];
+extern CRC_TABLE crc_alltables[];
 
 #endif /* CRC_H */
 /* Do not include anything AFTER the line above, as it would not be

@@ -61,14 +61,14 @@ int main(int argc, char **argv)
 		switch(opt) {
 		case 'p':
             {   int i;
-                for (i = 0; crcs_table[i]; i++)
-                    if (!strcasecmp(crcs_table[i]->cr_name, optarg)) break;
-                if (crcs_table[i]) p = crcs_table[i];
+                for (i = 0; crc_alltables[i]; i++)
+                    if (!strcasecmp(crc_alltables[i]->cr_name, optarg)) break;
+                if (crc_alltables[i]) p = crc_alltables[i];
             } break;
 		} /* switch */
 	} /* while */
 
-    if (!p) p = crcs_table[0];
+    if (!p) p = crc_alltables[0];
 
 	argc -= optind; argv += optind;
 
@@ -88,9 +88,9 @@ int main(int argc, char **argv)
 		for (i = 0; i < N; i++)
 			buffer[l+i] = 0xff;
 
-        m = do_crc(m, buffer, l, p->cr_table);
+        m = do_crc(m, buffer, l, p);
 
-		crc = m ^ add_crc(m, buffer + l, N);
+		crc = m ^ add_crc(m, buffer + l, N, p);
 
 		fprintbuf(stdout, l + N, buffer, 
 			"%s[0x%0*llx] %.*s", p->cr_name, N<<1, crc, l, buffer);

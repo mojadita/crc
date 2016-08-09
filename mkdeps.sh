@@ -6,6 +6,7 @@ libname="$1"
 
 tmpfile="/tmp/mkdeps-$$.dat"
 trap "rm -f $tmpfile" EXIT
+
 grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]' crctables.dat | sort >"$tmpfile"
 
 unset CRC_TABLES
@@ -25,10 +26,7 @@ cat <<EOF
 
 tables_names =$CRC_TABLES
 
-tables_static_objs = \$(crc_tables_names:=.o)
-tables_dynamic_objs = \$(crc_tables_names:=.so)
-tables_sources = \$(crc_tables_names:=.c)
-
+# individual source files dependencies
 EOF
 
 while read polin name comment
@@ -37,7 +35,3 @@ do
 	echo "	mkcrc -g -p $polin -n $name > ${name}.c"
 	echo
 done <"$tmpfile"
-
-cat <<EOF
-
-\$(tables_static_objs) \$(tables_dynamic_objs): crc.h

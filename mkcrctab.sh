@@ -14,10 +14,10 @@ do
     names="$names $name"
 done <"$tmpfile"
 
-cat <<EOF
-/* table of crc.  Be careful, as if you use this table you'll
- * force link of all the crc tables configured.
- * ATTENTION: THIS FILE GENERATED AUTOMATICALLY, DON'T EDIT.
+name=crc_alltables.h
+(cat <<EOF
+/* ${name}.  All tables definitions.
+ * ATTENTION: THIS FILE GENERATED AUTOMATICALLY, DON_T EDIT.
  * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: $(date)
  * Generated with: $0 $*
@@ -30,21 +30,44 @@ cat <<EOF
 /* external references */
 EOF
 
-
 for i in ${names}
 do
 	echo "extern CRC_TABLE ${i};"
 done 
 
-cat <<EOF
+) >"${name}"
 
-/* table */
-CRC_TABLE *${tablename}[] = {
+name=crc_alltables.c
+(cat <<EOF
+/* ${name}.  Be careful, as if you use this table you_ll
+ * force link of all the crc tables configured.
+ * ATTENTION: THIS FILE GENERATED AUTOMATICALLY, DON_T EDIT.
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
+ * Date: $(date)
+ * Generated with: $0 $*
+ * Copyright: (C) $(date +%Y) LUIS COLORADO SISTEMAS S.L.U.
+ *            All rights reserved.
+ */
+
+#include "crc.h"
+
+/* external references */
 EOF
 
 for i in ${names}
 do
-	echo "    &${i},"
+	echo "extern struct crc_table_s _${i};"
+done 
+
+cat <<EOF
+
+/* table */
+CRC_TABLE ${tablename}[] = {
+EOF
+
+for i in ${names}
+do
+	echo "    &_${i},"
 done
 
 cat <<EOF
@@ -54,3 +77,4 @@ size_t ${tablename}_n = sizeof ${tablename} / sizeof ${tablename}[0];
 
 /* EOF */
 EOF
+) >"${name}"

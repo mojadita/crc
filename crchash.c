@@ -22,8 +22,9 @@
 
 /* Standard include files */
 #include <string.h>
+#include "crc.h"
+#include "crc_alltables.h"
 #include "crchash.h"
-#include "crc32ieee8023.h"
 
 /* constants */
 
@@ -40,12 +41,12 @@ CRC_STATE crchash(char *s)
 {
 	int l = strlen(s);
 
-	return do_crc(0xffffffff, (CRC_BYTE *) s, l, crc32ieee8023) ^ 0xffffffff;
+	return do_crc(0xffffffff, (CRC_BYTE *) s, l, crc32ieee802_3) ^ 0xffffffff;
 } /* crchash */
 
 CRC_STATE crchashb(unsigned char *s, size_t n)
 {
-	return do_crc(0xffffffff, (CRC_BYTE *) s, n, crc32ieee8023) ^ 0xffffffff;
+	return do_crc(0xffffffff, (CRC_BYTE *) s, n, crc32ieee802_3) ^ 0xffffffff;
 } /* crchashb */
 
 /* $Id: crchash.c,v 2.4 2005/11/08 12:41:48 luis Exp $ */
