@@ -36,6 +36,7 @@
 #include <getopt.h>
 
 #include "crc.h"
+#include "crc_alltables.h"
 #include "fprintbuf.h"
 
 /* constants */
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
 		switch(opt) {
 		case 'p':
             {   int i;
-                for (i = 0; crc_alltables[i]; i++)
+                for (i = 0; i < crc_alltables_n; i++)
                     if (!strcasecmp(crc_alltables[i]->cr_name, optarg)) break;
                 if (crc_alltables[i]) p = crc_alltables[i];
             } break;
@@ -72,9 +73,14 @@ int main(int argc, char **argv)
 
 	argc -= optind; argv += optind;
 
+#if 0
 	while (m <= p->cr_table[0x80]) {
 		N++; m <<= 8; m |= 0xff;
 	} /* while */
+#else
+    N = p->cr_bytesize;
+    m = p->cr_mask;
+#endif
 
 	while(fgets((char *)buffer, NN-N, stdin)) {
 		CRC_STATE crc;
@@ -85,15 +91,14 @@ int main(int argc, char **argv)
 		if (l < 0) l = 0;
 		buffer[l] = '\0';
 
-		for (i = 0; i < N; i++)
-			buffer[l+i] = 0xff;
+        m = add_crc(m, buffer + l, N, p);
 
         m = do_crc(m, buffer, l, p);
 
-		crc = m ^ add_crc(m, buffer + l, N, p);
+		crc = add_crc(m, buffer + l, N, p);
 
 		fprintbuf(stdout, l + N, buffer, 
-			"%s[0x%0*llx] %.*s", p->cr_name, N<<1, crc, l, buffer);
+			"%s[0x%0*llx] %.*s", p->cr_name, (p->cr_size + 3)/4, crc, l, buffer);
 	} /* while */
 
 	return 0;

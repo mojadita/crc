@@ -35,6 +35,7 @@ do
 	echo "extern CRC_TABLE ${i};"
 done 
 
+echo "size_t ${tablename}_n;"
 ) >"${name}"
 
 name=crc_alltables.c

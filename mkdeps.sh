@@ -2,8 +2,6 @@
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
 # Date: lun dic  1 19:20:05 EET 2014
 
-libname="$1"
-
 tmpfile="/tmp/mkdeps-$$.dat"
 trap "rm -f $tmpfile" EXIT
 
