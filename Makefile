@@ -4,7 +4,7 @@
 .PHONY: all clean install deinstall
 
 package			?= crc
-version_major	?= 0.1
+version_major	?= 1
 version_minor	?= 1
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
