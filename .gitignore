@@ -55,4 +55,5 @@ libcrc.mk
 libcrc.so*
 mkcrc
 test_crc
+test_crc_so
 test_crchash
