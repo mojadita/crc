@@ -46,18 +46,18 @@ int config_flags = 0;
 /* functions */
 static void do_usage(void);
 static int check_name(char *s);
-static inline long cycle(CRC_STATE p);
+static inline CRC_STATE cycle(CRC_STATE p);
 
 static void do_usage(void)
 {
 } /* do_usage */
 
-static inline long cycle(CRC_STATE p)
+static inline CRC_STATE cycle(CRC_STATE p)
 {
-	int v1, v2;
+    CRC_STATE v1, v2;
 	CRC_STATE res = 0;
 
-	v1 = v2 = 1;
+	v1 = v2 = 1ULL;
 
 	/* buscamos la repetición */
 	do {
@@ -120,16 +120,18 @@ int main (int argc, char **argv)
 	limite = msbmask(pol_mask);
 
 	if (config_flags & FLAGS_LIST) {
+        char buffer[1024];
 		while (pol_mask <= limite) {
 			CRC_STATE cy = cycle(pol_mask);
 
-			printf("%20llu: 0x%llx %s",
-				cy, pol_mask, (cy == limite) ? " OK" : "");
+			printf("%20llu: 0x%llx", cy, pol_mask);
 			if ((cy == limite) || (config_flags & FLAGS_VERBOSE)) {
-                char buffer[1024];
-				printf(" --> %s", pol2str(pol_mask, buffer, sizeof buffer));
+				printf("%s%s",
+                        (cy == limite) ? " <<< " : " ",
+                        pol2str(pol_mask,
+                            buffer, sizeof buffer));
 			} /* if */
-			printf("\n");
+			printf("%s\n", (cy == limite) ? " >>>" : "");
 			pol_mask++;
 		} /* for */
 	} else if (config_flags & FLAGS_GEN) {
