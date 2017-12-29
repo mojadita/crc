@@ -1,14 +1,14 @@
 #!/bin/sh
-# Author: Luis Colorado <lc@luiscoloradosistemas.com>
+# Author: Luis Colorado <luiscoloradourcola@gmail.com>
 # Date: lun dic  1 19:20:05 EET 2014
 
 tmpfile="/tmp/mkcrctab-$$.dat"
 trap "rm -f $tmpfile" EXIT
-grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]' crctables.dat | sort >"$tmpfile"
+grep '^[ 	]*0x[0-9a-fA-F][0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]*' crctables.dat | sort >"$tmpfile"
 
 tablename="crc_alltables"
 unset polins names
-while read polin name dumb
+while read polin name comment
 do
     polins="$polins $polin"
     names="$names $name"

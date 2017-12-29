@@ -1,6 +1,7 @@
 *.o
 *.so
-chakravarty.c
+*.pico
+crc16chakravarty.c
 crc01.c
 crc04itu.c
 crc05epc.c
@@ -54,6 +55,8 @@ libcrc.a
 libcrc.mk
 libcrc.so*
 mkcrc
-test_crc
+crc
 test_crc_so
 test_crchash
+*.so.*
+*.so

@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 		crc = add_crc(m, buffer + l, N, p);
 
 		fprintbuf(stdout, l + N, buffer, 
-			"%s[%0*zd] %.*s",
+			"%s[%0*llx] %.*s",
 			p->cr_name,
 			(p->cr_size + 3)/4,
 			crc,
