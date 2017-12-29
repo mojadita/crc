@@ -2,21 +2,10 @@
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
 # Date: lun dic  1 19:20:05 EET 2014
 
-exec >libcrc.mk
 
-tmpfile="/tmp/mkdeps-$$.dat"
-trap "rm -f $tmpfile" EXIT
+exec 3>"libcrc.mk"
 
-grep '^[ 	]*0x[0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*' crctables.dat | sort >"$tmpfile"
-
-unset CRC_TABLES
-while read polin name comment
-do
-    echo "$name" >&2
-	CRC_TABLES="$CRC_TABLES ${name}"
-done <"$tmpfile"
-
-cat <<EOF
+cat <<EOF >&3
 # makefile for the creation of all the crc tables.
 # Author: Luis Colorado <luiscoloradourcola@gmail.com>
 # THIS FILE GENERATED AUTOMATICALLY, DON'T EDIT.
@@ -25,14 +14,15 @@ cat <<EOF
 # Copyright: (C) $(date +%Y) LUIS COLORADO SISTEMAS S.L.U.
 #            All rights reserved.
 
-tables_names =$CRC_TABLES
-
 # individual source files dependencies
 EOF
 
+grep '^[ 	]*0x[0-9a-fA-F][0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*' \
+	crctables.dat | sort |\
 while read polin name comment
 do
-	echo "${name}.c: mkcrc"
-	echo "	mkcrc -g -p $polin -n $name > ${name}.c"
-	echo
-done <"$tmpfile"
+	echo ${name}
+	echo "${name}.c: mkcrc" >&3
+	echo "	mkcrc -g -p $polin -n ${name} > \$@" >&3
+	echo >&3
+done

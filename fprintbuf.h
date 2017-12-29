@@ -1,5 +1,5 @@
 /* $Id: fprintbuf.h,v 2.1 2005/11/05 17:51:36 luis Exp $
- * Author: Luis Colorado <Luis.Colorado@HispaLinux.ES>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Thu Aug 18 15:47:09 CEST 2005
  *
  * Disclaimer:

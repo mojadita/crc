@@ -1,5 +1,5 @@
 /* $Id: test_crchash.c,v 2.2 2005/11/08 12:08:57 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Fri Nov  4 12:00:18 CET 2005
  * CONFIGURATION_ITEM: CPCI Controller Software(0141893320300)
  * CONFIGURATION_UNIT: Low Level OS Library (0141893321800)
@@ -49,12 +49,11 @@ static char TEST_CRC_C_RCSId[]="\n$Id: test_crchash.c,v 2.2 2005/11/08 12:08:57 
 int main(int argc, char **argv)
 {
 	static char buffer[1024];
-	extern CRC_STATE crc16arinc[];
 
 	while(fgets(buffer, sizeof buffer, stdin)) {
-		printf("0x%08llx: %s",
-			crchash(buffer),
-			buffer);
+		char *s = strtok(buffer, "\n");
+		if (!s) continue;
+		printf("0x%016llx: %s\n", crchash(s), s);
 	} /* while */
 
 	return 0;

@@ -5,24 +5,13 @@
 
 package			?= crc
 version_major	?= 1
-version_minor	?= 1
+version_minor	?= 2
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
 ddir			?= $(prefix)/share/$(package)
 bdir			?= $(prefix)/bin
 ldir			?= $(prefix)/lib
 
-LDFLAGS			?=
-CFLAGS		    ?=
-
-lib				= lib$(package)
-lib_so			= $(lib).so
-lib_a			= $(lib).a
-lib_soname		= $(lib_so).$(version_major)
-lib_fullname	= $(lib_soname).$(version_minor)
-
-targets_install = $(lib_a) $(lib_so)
-targets			= $(targets_install) test_crc test_crchash test_crc_so
 RM				= rm -f
 INSTALL			= install
 LINK			= ln -sf
@@ -31,88 +20,115 @@ FMOD			?= -m 0644
 DMOD			?= -m 0755
 XMOD			?= -m 0711
 
+.SUFFIXES: .c .o .pico .a .so
+
+LDFLAGS			?= -g
+CFLAGS		    ?= -g -O0
+
+tables_names 		!= mkdeps.sh
+tables_basenames 	= $(tables_names:S/^/lib/) lib$(package)
+tables_sos 			= $(tables_basenames:=.so)
+tables_sonames 		= $(tables_sos:=.$(version_major))
+tables_fullnames 	= $(tables_sonames:=.$(version_minor))
+tables_picos		= $(tables_names:=.pico) crc.pico
+tables_srcs			= $(tables_names:=.c)
+tables_objs			= $(tables_names:=.o) crc.o
+targets = $(tables_fullnames) $(tables_sonames) $(tables_sos)
+targets += libcrc_alltables.so.$(version_major).$(version_minor)
+targets += lib$(package).a
+toclean = $(targets) $(tables_picos) $(tables_srcs) $(tables_objs)
+targets				+= crc
+
 all: $(targets)
 clean:
-	$(RM) $(targets) $(toclean)
-install: $(targets_install)
-	-for i in $(idir) $(ddir) $(bdir) $(ldir); \
-	do \
-		$(INSTALL) $(DMOD) $(UMOD) -d $${i}; \
-	done
-	$(INSTALL) $(FMOD) $(UMOD) $(lib_fullname) $(ldir)
-	$(LINK) $(lib_fullname) $(ldir)/$(lib_soname)
-	$(LINK) $(lib_soname) $(ldir)/$(lib_so)
-	$(INSTALL) $(FMOD) $(UMOD) $(lib_a)        $(ldir)
+	$(RM) $(toclean)
+
+install: $(targets)
+.for i in $(idir) $(ddir) $(bdir) $(ldir)
+	$(INSTALL) $(DMOD) $(UMOD) -d ${i}
+.endfor
+.for i in $(tables_fullnames) \
+		lib$(package).so.$(version_major).$(version_minor) \
+		libcrc_alltables.so.$(version_major).$(version_minor)
+	$(INSTALL) $(FMOD) $(UMOD) $i $(ldir)
+	$(LINK) $i $(ldir)/$(i:.$(version_minor)=)
+	$(LINK) $(i:.$(version_minor)=) $(ldir)/$(i:.$(version_major).$(version_minor)=)
+.endfor
+	$(INSTALL) $(FMOD) $(UMOD) lib$(package).a $(ldir)
 	$(INSTALL) $(FMOD) $(UMOD) crc.h           $(idir)
 	$(INSTALL) $(FMOD) $(UMOD) crc_alltables.h $(idir)
+	$(INSTALL) $(XMOD) $(UMOD) mkcrc           $(bdir)
+
 deinstall:
-	-$(RM) $(ldir)/$(lib_fullname)
-	-$(RM) $(ldir)/$(lib_soname)
-	-$(RM) $(ldir)/$(lib_so)
-	-$(RM) $(ldir)/$(lib_a)
+.for i in $(tables_fullnames) \
+		lib$(package).so.$(version_major).$(version_minor) \
+		libcrc_alltables.so.$(version_major).$(version_minor)
+	-$(RM) $(ldir)/$i
+	-$(RM) $(ldir)/$(i:.$(version_minor)=)
+	-$(RM) $(ldir)/$(i:.$(version_major).$(version_minor)=)
+.endfor
+	-$(RM) $(ldir)/lib$(package).so.$(version_major).$(version_minor)
+	-$(RM) $(ldir)/lib$(package).so.$(version_major)
+	-$(RM) $(ldir)/lib$(package).so
+	-$(RM) $(ldir)/lib$(package).a
 	-$(RM) $(idir)/crc.h
 	-$(RM) $(idir)/crc_alltables.h
+	-$(RM) $(bdir)/mkcrc
 
-.SUFFIXES: .c .o .so .a
+$(tables_fullnames): $(@:S/^lib//:.so.$(version_major).$(version_minor)=.pico)
+	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=$(@:.$(version_minor)=) $?
+$(tables_sonames):
+	$(LINK) $(@:=.$(version_minor)) $@
+$(tables_sos):
+	$(LINK) $(@:=.$(version_major)) $@
 
 .include "libcrc.mk"
 
-tables_extra = crc crc_alltables
+libcrc_alltables.so.$(version_major).$(version_minor): crc_alltables.pico $(tables_fullnames)
+	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=libcrc_alltables.so.$(version_major) $>
+toclean			+= libcrc_alltables.so.$(version_major).$(version_minor)
+toclean			+= libcrc_alltables.so.$(version_major)
+toclean			+= libcrc_alltables.so
 
-tables_static_objs = $(tables_names:=.o) $(tables_extra:=.o)
-toclean			+= $(tables_static_objs)
+lib_a_objs = $(tables_objs) crc.o crc_alltables.o
 
-tables_dynamic_objs = $(tables_names:=.so) $(tables_extra:=.so)
-toclean			+= $(tables_dynamic_objs)
-
-tables_sources = $(tables_names:=.c)
-toclean			+= $(tables_sources)
-
-$(lib_a): $(tables_static_objs)
-	ar r $@ $?
+lib$(package).a: $(lib_a_objs:.o=.c)
+	$(CC) $(CFLAGS) -c $?
+	ar -r $@ $(?:.c=.o)
 	ranlib $@
 
-$(lib_so): $(lib_soname)
-	$(LINK) $? $@
-$(lib_soname): $(lib_fullname)
-	$(LINK) $? $@
-$(lib_fullname): $(tables_dynamic_objs)
-	$(CC) $(LDFLAGS) -o $@ -shared $(tables_dynamic_objs)
-toclean			+= $(lib_so) $(lib_soname) $(lib_fullname)
+	$(RM) $(?:.c=.o)
 
-.c.so:
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+.c.pico:
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
-$(tables_static_objs) $(tables_dynamic_objs): crc.h
-
+# MKCRC
 mkcrc_objs = mkcrc.o bits.o
 toclean			+= $(mkcrc_objs) mkcrc
 mkcrc: $(mkcrc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(mkcrc_objs)
 $(mkcrc_objs): crc.h bits.h
 
-crc_alltables.{c,h}: mkcrctab.sh
+crc_objs = test_crc.o fprintbuf.o
+crc_ldflags = -L$(ldir)
+crc_libs = -lcrc -lcrc_alltables
+crc: $(crc_objs)
+	$(CC) $(LDFLAGS) -o $@ $(crc_ldflags) $(crc_objs) $(crc_libs)
+
+crc_alltables.c crc_alltables.h: mkcrctab.sh
 	mkcrctab.sh 
-toclean			+= crc_alltables.{c,h,so,o}
+toclean			+= crc_alltables.c crc_alltables.h
+
 crc_alltables.o: crc_alltables.h
-
-test_crc_objs = test_crc.o fprintbuf.o libcrc.a 
-toclean			+= test_crc.o fprintbuf.o
-test_crc: $(test_crc_objs)
-	$(CC) $(LDFLAGS) -o $@ $(test_crc_objs)
-
-test_crc_so_objs = test_crc.o fprintbuf.o libcrc.so
-test_crc_so: $(test_crc_so_objs)
-	$(CC) $(LDFLAGS) -o $@ $(test_crc_so_objs)
-
-test_crchash_objs = test_crchash.o crchash.o fprintbuf.o libcrc.a
-toclean			+= test_crchash.o crchash.o 
-test_crchash: $(test_crchash_objs)
-	$(CC) $(LDFLAGS) -o $@ $(test_crchash_objs)
-
-test_crc.o test_crchash.o: crc.h crc_alltables.h
+toclean			+= crc_alltables.o
+crc_alltables.pico: crc_alltables.h
+toclean			+= crc_alltables.pico
 
 fprintbuf.o: fprintbuf.h
+toclean			+= fprintbuf.o
 
 libcrc.mk: mkdeps.sh
 	mkdeps.sh >$@
+

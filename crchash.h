@@ -1,5 +1,5 @@
 /* $Id: crchash.h,v 2.4 2005/11/08 12:41:48 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Sat Nov  5 20:15:26 CET 2005
  *
  * Disclaimer:

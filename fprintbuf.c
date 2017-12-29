@@ -1,5 +1,5 @@
 /* $Id: fprintbuf.c,v 2.1 2005/11/05 17:51:36 luis Exp $
- * AUTHOR: Luis Colorado <licolorado@indra.es>
+ * AUTHOR: Luis Colorado <luiscoloradourcola@gmail.com>
  * DATE: 7.10.92.
  * DESC: muestra un buffer de datos en hexadecimal y ASCII.
  */

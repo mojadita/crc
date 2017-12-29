@@ -1,5 +1,5 @@
 /* bits.c -- routines to obtain a mask and the MSB of a CRC_STATE.
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Thu Nov  3 16:18:12 CET 2005
  *
  * Disclaimer:

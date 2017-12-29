@@ -1,5 +1,5 @@
 /* $Id: crc.h,v 2.1 2005/11/05 17:51:35 luis Exp $
- * AUTHOR: Luis Colorado <lc@luiscoloradosistemas.com>
+ * AUTHOR: Luis Colorado <luiscoloradourcola@gmail.com>
  * DATE: Fri Nov  4 12:06:21 CET 2005
  *
  * Disclaimer:
@@ -25,6 +25,7 @@
 #define CRC_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 static char CRC_H_RCSId[] = "\n$Id: crc.h,v 2.1 2005/11/05 17:51:35 luis Exp $\n";
 
@@ -34,8 +35,8 @@ static char CRC_H_RCSId[] = "\n$Id: crc.h,v 2.1 2005/11/05 17:51:35 luis Exp $\n
 #define CRC_BYTE_MASK	0xff
 
 /* types */
-typedef unsigned char CRC_BYTE;
-typedef unsigned long long CRC_STATE;
+typedef uint8_t CRC_BYTE;
+typedef uint64_t CRC_STATE;
 typedef struct crc_table_s {
 	char      *cr_name;
     char      *cr_strpolin;

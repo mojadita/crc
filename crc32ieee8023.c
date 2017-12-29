@@ -1,5 +1,5 @@
 /* $Id: crc32ieee8023.c,v 2.1 2005/11/05 17:51:35 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Fri Nov  4 13:14:18 CET 2005
  * CONFIGURATION_ITEM: CPCI Controller Software(0141893320300)
  * CONFIGURATION_UNIT: Low Level OS Library (0141893321800)

@@ -1,5 +1,5 @@
 /* $Id: crchash.c,v 2.4 2005/11/08 12:41:48 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Sat Nov  5 20:10:47 CET 2005
  *
  * Disclaimer:
@@ -41,12 +41,12 @@ CRC_STATE crchash(char *s)
 {
 	int l = strlen(s);
 
-	return do_crc(0xffffffff, (CRC_BYTE *) s, l, crc32ieee802_3) ^ 0xffffffff;
+	return do_crc(0xffffffffffffffff, (CRC_BYTE *) s, l, crc64ecma) ^ 0xffffffffffffffff;
 } /* crchash */
 
 CRC_STATE crchashb(unsigned char *s, size_t n)
 {
-	return do_crc(0xffffffff, (CRC_BYTE *) s, n, crc32ieee802_3) ^ 0xffffffff;
+	return do_crc(0xffffffffffffffff, (CRC_BYTE *) s, n, crc64ecma) ^ 0xffffffffffffffff;
 } /* crchashb */
 
 /* $Id: crchash.c,v 2.4 2005/11/08 12:41:48 luis Exp $ */

@@ -1,5 +1,5 @@
 /* $Id: mkcrc.c,v 2.2 2005/11/07 23:22:18 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Thu Nov  3 10:05:42 CET 2005
  *
  * Disclaimer:
@@ -48,10 +48,6 @@ static void do_usage(void);
 static int check_name(char *s);
 static inline CRC_STATE cycle(CRC_STATE p);
 
-static void do_usage(void)
-{
-} /* do_usage */
-
 static inline CRC_STATE cycle(CRC_STATE p)
 {
     CRC_STATE v1, v2;
@@ -80,6 +76,27 @@ static int check_name(char *s)
         if (!isalnum(*s) && *s != '_') return -1;
     return 0;
 }
+
+static void do_usage(void)
+{
+    fprintf(stderr,
+		"Usage: mkcrc [ options ... ]\n"
+		"Options:\n"
+		" -h  help option.  Shows this help screen.\n"
+		" -n <name> Use <name> as name for generated polynomial.\n"
+		" -p <pol> Use polynomial <pol>  Polinomial is\n"
+		"	 given in hex with least significant coefficient x0\n"
+		"	 in most significant bit.  Most significant bit, which\n"
+		"	 should be always one, is not included in hex number, so\n"
+		"	 for example 0x1001 represents the polynomial\n"
+		"	 x^13 + x^12 + 1.\n"
+		" -l  lists polinomials from the given one upwards to exhaust\n"
+		"	 all the polynomial space.\n"
+		" -g  generates the polynomial table (256 entries) of xor masks.\n"
+		"	 table can be used with the crc() function.\n"
+		" -v  be verbose.\n"
+		"\n");
+} /* do_usage */
 
 /* main program */
 int main (int argc, char **argv)
@@ -154,8 +171,8 @@ int main (int argc, char **argv)
         printf("\t/* cr_name    : */ \"%s\",\n",    name);
         printf("\t/* cr_strpolin: */ \"%s\",\n",
                 pol2str(pol_mask, buffer, sizeof buffer)); 
-        printf("\t/* cr_size    : */ %lu,\n",      (size_t)size);
-        printf("\t/* cr_bytesize: */ %lu,\n",      ((size_t)size+7) / 8);
+        printf("\t/* cr_size    : */ %zu,\n",      (size_t)size);
+        printf("\t/* cr_bytesize: */ %zu,\n",      ((size_t)size+7) / 8);
         printf("\t/* cr_polin   : */ %#llx,\n",     pol_mask);
         printf("\t/* cr_mask    : */ %#llx,\n",     limite);
         printf("\t/* cr_table[] : */ {\n");

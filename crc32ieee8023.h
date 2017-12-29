@@ -1,5 +1,5 @@
 /* $Id: crc32ieee8023.h,v 2.1 2005/11/05 17:51:35 luis Exp $
- * AUTHOR: Luis Colorado <lc@luiscoloradosistemas.com>
+ * AUTHOR: Luis Colorado <luiscoloradourcola@gmail.com>
  * DATE: Fri Nov  4 13:19:46 CET 2005
  *
  * Disclaimer:

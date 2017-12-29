@@ -1,5 +1,5 @@
 /* $Id: test_crc.c,v 2.4 2005/11/07 23:22:18 luis Exp $
- * Author: Luis Colorado <lc@luiscoloradosistemas.com>
+ * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Fri Nov  4 12:00:18 CET 2005
  * CONFIGURATION_ITEM: CPCI Controller Software(0141893320300)
  * CONFIGURATION_UNIT: Low Level OS Library (0141893321800)
@@ -62,9 +62,15 @@ int main(int argc, char **argv)
 		switch(opt) {
 		case 'p':
             {   int i;
-                for (i = 0; i < crc_alltables_n; i++)
-                    if (!strcasecmp(crc_alltables[i]->cr_name, optarg)) break;
-                if (crc_alltables[i]) p = crc_alltables[i];
+                for (i = 0; i < crc_alltables_n; i++) {
+                    if (strcasecmp(crc_alltables[i]->cr_name, optarg) == 0) {
+						fprintf(stderr,
+							"Pol: %s\n", crc_alltables[i]->cr_name);
+						break;
+					} /* if */
+				} /* for */
+                if (i < crc_alltables_n)
+					p = crc_alltables[i];
             } break;
 		} /* switch */
 	} /* while */
@@ -98,7 +104,12 @@ int main(int argc, char **argv)
 		crc = add_crc(m, buffer + l, N, p);
 
 		fprintbuf(stdout, l + N, buffer, 
-			"%s[0x%0*llx] %.*s", p->cr_name, (p->cr_size + 3)/4, crc, l, buffer);
+			"%s[%0*zd] %.*s",
+			p->cr_name,
+			(p->cr_size + 3)/4,
+			crc,
+			l,
+			buffer);
 	} /* while */
 
 	return 0;
