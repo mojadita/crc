@@ -5,7 +5,7 @@
 
 package			?= crc
 version_major	?= 1
-version_minor	?= 2
+version_minor	?= 5
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
 ddir			?= $(prefix)/share/$(package)
@@ -20,89 +20,73 @@ FMOD			?= -m 0644
 DMOD			?= -m 0755
 XMOD			?= -m 0711
 
-.SUFFIXES: .c .o .pico .a .so
+.SUFFIXES: .pico
+
+.c.pico:
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 LDFLAGS			?= -g
 CFLAGS		    ?= -g -O0
 
 tables_names 		!= mkdeps.sh
-tables_basenames 	= $(tables_names:S/^/lib/) lib$(package)
-tables_sos 			= $(tables_basenames:=.so)
-tables_sonames 		= $(tables_sos:=.$(version_major))
-tables_fullnames 	= $(tables_sonames:=.$(version_minor))
-tables_picos		= $(tables_names:=.pico) crc.pico
+tables_picos		= $(tables_names:=.pico)
 tables_srcs			= $(tables_names:=.c)
-tables_objs			= $(tables_names:=.o) crc.o
-targets = $(tables_fullnames) $(tables_sonames) $(tables_sos)
-targets += libcrc_alltables.so.$(version_major).$(version_minor)
-targets += lib$(package).a
-toclean = $(targets) $(tables_picos) $(tables_srcs) $(tables_objs)
-targets				+= crc
+tables_objs			= $(tables_names:=.o)
+lib_base			= lib$(package)
+lib_a				= $(lib_base).a
+lib_so				= $(lib_base).so
+lib_soname			= $(lib_so).$(version_major)
+lib_fullname		= $(lib_soname).$(version_minor)
+toclean				+= $(tables_picos) crc.pico crchash.pico crc_alltables.pico
+toclean				+= $(tables_srcs)
+toclean				+= $(lib_a) $(lib_so) $(lib_soname) $(lib_fullname)
+
+targets = test_crc test_crchash
+toclean += $(targets)
 
 all: $(targets)
 clean:
 	$(RM) $(toclean)
 
 install: $(targets)
-.for i in $(idir) $(ddir) $(bdir) $(ldir)
-	$(INSTALL) $(DMOD) $(UMOD) -d ${i}
-.endfor
-.for i in $(tables_fullnames) \
-		lib$(package).so.$(version_major).$(version_minor) \
-		libcrc_alltables.so.$(version_major).$(version_minor)
-	$(INSTALL) $(FMOD) $(UMOD) $i $(ldir)
-	$(LINK) $i $(ldir)/$(i:.$(version_minor)=)
-	$(LINK) $(i:.$(version_minor)=) $(ldir)/$(i:.$(version_major).$(version_minor)=)
-.endfor
-	$(INSTALL) $(FMOD) $(UMOD) lib$(package).a $(ldir)
-	$(INSTALL) $(FMOD) $(UMOD) crc.h           $(idir)
-	$(INSTALL) $(FMOD) $(UMOD) crc_alltables.h $(idir)
-	$(INSTALL) $(XMOD) $(UMOD) mkcrc           $(bdir)
+	$(INSTALL) $(DMOD) $(UMOD) -d ${idir}
+	$(INSTALL) $(DMOD) $(UMOD) -d ${ddir}
+	$(INSTALL) $(DMOD) $(UMOD) -d ${bdir}
+	$(INSTALL) $(DMOD) $(UMOD) -d ${ldir}
+	$(INSTALL) $(FMOD) $(UMOD) $(lib_a) 		$(ldir)
+	$(INSTALL) $(FMOD) $(UMOD) $(lib_fullname) 	$(ldir)
+	$(LINK) $(lib_fullname) $(ldir)/$(lib_soname)
+	$(LINK) $(ldir)/$(lib_soname) $(ldir)/$(lib_so)
+	$(INSTALL) $(FMOD) $(UMOD) crc.h           	$(idir)
+	$(INSTALL) $(FMOD) $(UMOD) crc_alltables.h 	$(idir)
+	$(INSTALL) $(XMOD) $(UMOD) mkcrc           	$(bdir)
 
 deinstall:
-.for i in $(tables_fullnames) \
-		lib$(package).so.$(version_major).$(version_minor) \
-		libcrc_alltables.so.$(version_major).$(version_minor)
-	-$(RM) $(ldir)/$i
-	-$(RM) $(ldir)/$(i:.$(version_minor)=)
-	-$(RM) $(ldir)/$(i:.$(version_major).$(version_minor)=)
-.endfor
-	-$(RM) $(ldir)/lib$(package).so.$(version_major).$(version_minor)
-	-$(RM) $(ldir)/lib$(package).so.$(version_major)
-	-$(RM) $(ldir)/lib$(package).so
-	-$(RM) $(ldir)/lib$(package).a
-	-$(RM) $(idir)/crc.h
-	-$(RM) $(idir)/crc_alltables.h
 	-$(RM) $(bdir)/mkcrc
+	-$(RM) $(idir)/crc_alltables.h
+	-$(RM) $(idir)/crc.h
+	-$(RM) $(ldir)/$(lib_so)
+	-$(RM) $(ldir)/$(lib_soname)
+	-$(RM) $(ldir)/$(lib_fullname)
+	-$(RM) $(ldir)/$(lib_a)
 
-$(tables_fullnames): $(@:S/^lib//:.so.$(version_major).$(version_minor)=.pico)
-	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=$(@:.$(version_minor)=) $?
-$(tables_sonames):
-	$(LINK) $(@:=.$(version_minor)) $@
-$(tables_sos):
-	$(LINK) $(@:=.$(version_major)) $@
-
-.include "libcrc.mk"
-
-libcrc_alltables.so.$(version_major).$(version_minor): crc_alltables.pico $(tables_fullnames)
-	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=libcrc_alltables.so.$(version_major) $>
-toclean			+= libcrc_alltables.so.$(version_major).$(version_minor)
-toclean			+= libcrc_alltables.so.$(version_major)
-toclean			+= libcrc_alltables.so
-
-lib_a_objs = $(tables_objs) crc.o crc_alltables.o
-
-lib$(package).a: $(lib_a_objs:.o=.c)
+lib_a_srcs = $(tables_srcs) crc.c crc_alltables.c crchash.c
+$(lib_a): $(lib_a_srcs)
 	$(CC) $(CFLAGS) -c $?
 	ar -r $@ $(?:.c=.o)
-	ranlib $@
 
 	$(RM) $(?:.c=.o)
+	ranlib $@
 
-.c.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
-.c.pico:
-	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+$(lib_so): $(lib_soname)
+	$(LINK) $> $@
+$(lib_soname): $(lib_fullname)
+	$(LINK) $> $@
+lib_fullname_objs = $(tables_picos) crc.pico crc_alltables.pico crchash.pico
+$(lib_fullname): $(lib_fullname_objs)
+	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(lib_soname) $(lib_fullname_objs)
+
+.include "libcrc.mk"
 
 # MKCRC
 mkcrc_objs = mkcrc.o bits.o
@@ -111,24 +95,31 @@ mkcrc: $(mkcrc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(mkcrc_objs)
 $(mkcrc_objs): crc.h bits.h
 
-crc_objs = test_crc.o fprintbuf.o
-crc_ldflags = -L$(ldir)
-crc_libs = -lcrc -lcrc_alltables
-crc: $(crc_objs)
-	$(CC) $(LDFLAGS) -o $@ $(crc_ldflags) $(crc_objs) $(crc_libs)
+# test programs
+test_crc_objs = test_crc.o fprintbuf.o
+toclean			+= test_crc.o
+test_crc_deps = $(lib_so) $(lib_a)
+test_crc_ldflags = -L. -L$(ldir)
+test_crc_libs = -lcrc
+test_crc: $(test_crc_objs) $(test_crc_deps)
+	$(CC) $(LDFLAGS) -o $@ $($@_ldflags) $($@_objs) $($@_libs)
+test_crc.o: crc.h crc_alltables.h
 
-crc_alltables.c crc_alltables.h: mkcrctab.sh
+test_crchash_objs = test_crchash.o fprintbuf.o
+toclean			+= test_crchash.o
+test_crchash_deps = $(lib_so) $(lib_a)
+test_crchash_ldflags = -L. -L$(ldir)
+test_crchash_libs = -lcrc
+test_crchash: $(test_crchash_objs) $(test_crchash_deps)
+	$(CC) $(LDFLAGS) -o $@ $($@_ldflags) $($@_objs) $($@_libs)
+test_crchash.o: crc.h crc_alltables.h
+
+mod_alltables	= crc_alltables.c crc_alltables.h
+$(mod_alltables): mkcrctab.sh
 	mkcrctab.sh 
-toclean			+= crc_alltables.c crc_alltables.h
+toclean			+= $(mod_alltables)
 
-crc_alltables.o: crc_alltables.h
-toclean			+= crc_alltables.o
-crc_alltables.pico: crc_alltables.h
-toclean			+= crc_alltables.pico
+crc_alltables.o crc_alltables.pico: crc_alltables.h
 
 fprintbuf.o: fprintbuf.h
 toclean			+= fprintbuf.o
-
-libcrc.mk: mkdeps.sh
-	mkdeps.sh >$@
-
