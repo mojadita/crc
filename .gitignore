@@ -55,7 +55,7 @@ libcrc.a
 libcrc.mk
 libcrc.so*
 mkcrc
-crc
+test_crc
 test_crc_so
 test_crchash
 *.so.*
