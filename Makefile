@@ -5,7 +5,7 @@
 
 package			?= crc
 version_major	?= 1
-version_minor	?= 5
+version_minor	?= 6
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
 ddir			?= $(prefix)/share/$(package)
