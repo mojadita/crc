@@ -5,7 +5,7 @@
 
 package			?= crc
 version_major	?= 1
-version_minor	?= 6
+version_minor	?= 7
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
 ddir			?= $(prefix)/share/$(package)
@@ -55,8 +55,8 @@ install: $(targets)
 	$(INSTALL) $(DMOD) $(UMOD) -d ${ldir}
 	$(INSTALL) $(FMOD) $(UMOD) $(lib_a) 		$(ldir)
 	$(INSTALL) $(FMOD) $(UMOD) $(lib_fullname) 	$(ldir)
-	$(LINK) $(lib_fullname) $(ldir)/$(lib_soname)
-	$(LINK) $(ldir)/$(lib_soname) $(ldir)/$(lib_so)
+	$(LINK) $(lib_fullname)	$(ldir)/$(lib_soname)
+	$(LINK) $(lib_soname)	$(ldir)/$(lib_so)
 	$(INSTALL) $(FMOD) $(UMOD) crc.h           	$(idir)
 	$(INSTALL) $(FMOD) $(UMOD) crc_alltables.h 	$(idir)
 	$(INSTALL) $(XMOD) $(UMOD) mkcrc           	$(bdir)
