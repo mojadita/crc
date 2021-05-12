@@ -1,6 +1,6 @@
 #!/bin/sh
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
-# Date: lun dic  1 19:20:05 EET 2014
+# Date: Mon dec  1 19:20:05 EET 2014
 
 
 exec 3>"libcrc.mk"

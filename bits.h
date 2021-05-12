@@ -1,6 +1,8 @@
 /* bits.h -- definitions for functions on module bits.c
  * Author: Luis Colorado <luiscoloradourcola@gmail.com>
  * Date: Tue Aug  9 09:38:41 EEST 2016
+ * Copyright: (C) 2005-2021 Luis Colorado.  All rights reserved.
+ * License: BSD
  */
 #ifndef _BITS_H
 #define _BITS_H

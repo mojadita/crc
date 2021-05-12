@@ -4,7 +4,9 @@
 
 tmpfile="/tmp/mkcrctab-$$.dat"
 trap "rm -f $tmpfile" EXIT
-grep '^[ 	]*0x[0-9a-fA-F][0-9a-fA-F]*[ 	]*[_a-zA-Z][_a-zA-Z0-9]*[ 	]*' crctables.dat | sort >"$tmpfile"
+grep '^[ \t]*0x[0-9a-fA-F][0-9a-fA-F]*[ \t]*[_a-zA-Z][_a-zA-Z0-9]*[ \t]*' \
+    crctables.dat \
+| sort >"$tmpfile"
 
 tablename="crc_alltables"
 unset polins names
@@ -32,8 +34,8 @@ EOF
 
 for i in ${names}
 do
-	echo "extern CRC_TABLE ${i};"
-done 
+    echo "extern CRC_TABLE ${i};"
+done
 
 echo "extern size_t ${tablename}_n;"
 ) >"${name}"
@@ -44,7 +46,7 @@ name=crc_alltables.c
  * force link of all the crc tables configured.
  * ATTENTION: THIS FILE GENERATED AUTOMATICALLY, DON_T EDIT.
  * Author: Luis Colorado <luiscoloradourcola@gmail.com>
- * Date: $(date)
+ * Date: $(LANG=C date)
  * Generated with: $0 $*
  * Copyright: (C) $(date +%Y) LUIS COLORADO SISTEMAS S.L.U.
  *            All rights reserved.
@@ -57,8 +59,8 @@ EOF
 
 for i in ${names}
 do
-	echo "extern struct crc_table_s _${i};"
-done 
+    echo "extern struct crc_table_s _${i};"
+done
 
 cat <<EOF
 
@@ -68,13 +70,14 @@ EOF
 
 for i in ${names}
 do
-	echo "    &_${i},"
+    echo "    &_${i},"
 done
 
 cat <<EOF
 }; /* crcs_table */
 
-size_t ${tablename}_n = sizeof ${tablename} / sizeof ${tablename}[0];
+size_t ${tablename}_n = sizeof ${tablename}
+    / sizeof ${tablename}[0];
 
 /* EOF */
 EOF

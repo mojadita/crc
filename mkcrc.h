@@ -2,8 +2,8 @@
  * Date: vie nov 28 22:03:32 EET 2014
  * Disclaimer: (C) 2014 LUIS COLORADO SISTEMAS S.L.U.
  * All rights reserved.
+ * License: BSD.
  */
-
 #ifndef _MKCRC_H
 #define _MKCRC_H
 
