@@ -138,7 +138,8 @@ int main (int argc, char **argv)
         int i;
         size_t size = msbpos(pol_mask);;
         char buffer[1024];
-        struct tm *now = localtime(time(NULL), NULL);
+		time_t now0 = time(NULL);
+        struct tm *now = localtime(&now0);
 
         printf(
 "/* THIS FILE GENERATED AUTOMATICALLY, DON'T EDIT.\n"
