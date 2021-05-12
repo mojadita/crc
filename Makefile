@@ -12,9 +12,9 @@ ddir			?= $(prefix)/share/$(package)
 bdir			?= $(prefix)/bin
 ldir			?= $(prefix)/lib
 
-RM				= rm -f
-INSTALL			= install
-LINK			= ln -sf
+RM				 = rm -f
+INSTALL			 = install
+LINK			 = ln -sf
 UMOD			?= -o $$(id -u) -g $$(id -g)
 FMOD			?= -m 0644
 DMOD			?= -m 0755
@@ -28,21 +28,21 @@ XMOD			?= -m 0711
 LDFLAGS			?= -g
 CFLAGS		    ?= -g -O0
 
-tables_names 		!= mkdeps.sh
-tables_picos		= $(tables_names:=.pico)
-tables_srcs			= $(tables_names:=.c)
-tables_objs			= $(tables_names:=.o)
-lib_base			= lib$(package)
-lib_a				= $(lib_base).a
-lib_so				= $(lib_base).so
-lib_soname			= $(lib_so).$(version_major)
-lib_fullname		= $(lib_soname).$(version_minor)
-toclean				+= $(tables_picos) crc.pico crchash.pico crc_alltables.pico
-toclean				+= $(tables_srcs)
-toclean				+= $(lib_a) $(lib_so) $(lib_soname) $(lib_fullname)
+tables_names   != mkdeps.sh
+tables_picos	= $(tables_names:=.pico)
+tables_srcs		= $(tables_names:=.c)
+tables_objs		= $(tables_names:=.o)
+lib_base		= lib$(package)
+lib_a			= $(lib_base).a
+lib_so			= $(lib_base).so
+lib_soname		= $(lib_so).$(version_major)
+lib_fullname	= $(lib_soname).$(version_minor)
+toclean		   += $(tables_picos) crc.pico crchash.pico crc_alltables.pico
+toclean		   += $(tables_srcs)
+toclean		   += $(lib_a) $(lib_so) $(lib_soname) $(lib_fullname)
 
-targets = test_crc test_crchash
-toclean += $(targets)
+targets         = test_crc test_crchash crc
+toclean        += $(targets)
 
 all: $(targets)
 clean:
@@ -70,56 +70,71 @@ deinstall:
 	-$(RM) $(ldir)/$(lib_fullname)
 	-$(RM) $(ldir)/$(lib_a)
 
+# STATIC LIBRARY
 lib_a_srcs = $(tables_srcs) crc.c crc_alltables.c crchash.c
 $(lib_a): $(lib_a_srcs)
 	$(CC) $(CFLAGS) -c $?
 	ar -r $@ $(?:.c=.o)
-
+	...
 	$(RM) $(?:.c=.o)
 	ranlib $@
+
+# DYNAMIC LIBRARY
+lib_fullname_deps =
+lib_fullname_objs = $(tables_picos) crc.pico crc_alltables.pico crchash.pico
 
 $(lib_so): $(lib_soname)
 	$(LINK) $> $@
 $(lib_soname): $(lib_fullname)
 	$(LINK) $> $@
-lib_fullname_objs = $(tables_picos) crc.pico crc_alltables.pico crchash.pico
 $(lib_fullname): $(lib_fullname_objs)
 	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(lib_soname) $(lib_fullname_objs)
 
 .include "libcrc.mk"
 
+# CRC
+crc_deps          = $(lib_a) $(lib_so)
+crc_objs          = main.o
+crc_libs          = -lcrc
+crc_ldfl          = -L.
+toclean          += $(crc_objs) crc
+crc: $(crc_deps) $(crc_objs)
+	$(CC) $(LDFLAGS) $($@_ldfl) -o $@ $($@_objs) $($@_libs)
+
 # MKCRC
-mkcrc_objs = mkcrc.o bits.o
-toclean			+= $(mkcrc_objs) mkcrc
+mkcrc_deps        =
+mkcrc_objs        = mkcrc.o bits.o
+mkcrc_ldfl        =
+mkcrc_libs        =
+toclean	         += $(mkcrc_objs) mkcrc
 mkcrc: $(mkcrc_objs)
 	$(CC) $(LDFLAGS) -o $@ $(mkcrc_objs)
-$(mkcrc_objs): crc.h bits.h
 
 # test programs
-test_crc_objs = test_crc.o fprintbuf.o
-toclean			+= test_crc.o
-test_crc_deps = $(lib_so) $(lib_a)
-test_crc_ldflags = -L. -L$(ldir)
-test_crc_libs = -lcrc
+test_crc_deps     = $(lib_so) $(lib_a)
+test_crc_objs     = test_crc.o fprintbuf.o
+test_crc_ldfl     = -L. -L$(ldir)
+test_crc_libs     = -lcrc
+toclean		     += test_crc.o
 test_crc: $(test_crc_objs) $(test_crc_deps)
-	$(CC) $(LDFLAGS) -o $@ $($@_ldflags) $($@_objs) $($@_libs)
+	$(CC) $(LDFLAGS) -o $@ $($@_ldfl) $($@_objs) $($@_libs)
 test_crc.o: crc.h crc_alltables.h
 
-test_crchash_objs = test_crchash.o fprintbuf.o
-toclean			+= test_crchash.o
 test_crchash_deps = $(lib_so) $(lib_a)
-test_crchash_ldflags = -L. -L$(ldir)
+test_crchash_objs = test_crchash.o fprintbuf.o
+test_crchash_ldfl = -L. -L$(ldir)
 test_crchash_libs = -lcrc
-test_crchash: $(test_crchash_objs) $(test_crchash_deps)
-	$(CC) $(LDFLAGS) -o $@ $($@_ldflags) $($@_objs) $($@_libs)
+toclean			 += test_crchash.o
+test_crchash: $(test_crchash_deps) $(test_crchash_objs)
+	$(CC) $(LDFLAGS) -o $@ $($@_ldfl) $($@_objs) $($@_libs)
 test_crchash.o: crc.h crc_alltables.h
 
-mod_alltables	= crc_alltables.c crc_alltables.h
+mod_alltables 	  = crc_alltables.c crc_alltables.h
 $(mod_alltables): mkcrctab.sh crctables.dat
 	mkcrctab.sh 
-toclean			+= $(mod_alltables)
+toclean			 += $(mod_alltables)
 
 crc_alltables.o crc_alltables.pico: crc_alltables.h
 
 fprintbuf.o: fprintbuf.h
-toclean			+= fprintbuf.o
+toclean		 	 += fprintbuf.o
