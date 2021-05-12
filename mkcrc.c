@@ -93,6 +93,7 @@ int main (int argc, char **argv)
 
     while ((opt = getopt(argc, argv, "hp:n:lgv")) != EOF) {
         switch(opt) {
+		case '?':
         case 'h': do_usage(); exit(0);
         case 'n':
             if (check_name(optarg)) {

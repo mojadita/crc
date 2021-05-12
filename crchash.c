@@ -18,7 +18,7 @@ CRC_STATE crchash(char *s)
             0xffffffffffffffff,
             (CRC_BYTE *) s,
             l,
-            crc64ecma)
+            crc64ecma182)
         ^ 0xffffffffffffffff;
 } /* crchash */
 
@@ -28,6 +28,6 @@ CRC_STATE crchashb(unsigned char *s, size_t n)
             0xffffffffffffffff,
             (CRC_BYTE *) s,
             n,
-            crc64ecma)
+            crc64ecma182)
         ^ 0xffffffffffffffff;
 } /* crchashb */

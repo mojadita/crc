@@ -4,6 +4,7 @@
 
 tmpfile="/tmp/mkcrctab-$$.dat"
 trap "rm -f $tmpfile" EXIT
+
 grep '^[ \t]*0x[0-9a-fA-F][0-9a-fA-F]*[ \t]*[_a-zA-Z][_a-zA-Z0-9]*[ \t]*' \
     crctables.dat \
 | sort >"$tmpfile"

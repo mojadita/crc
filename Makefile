@@ -5,7 +5,7 @@
 
 package			?= crc
 version_major	?= 1
-version_minor	?= 7
+version_minor	?= 8
 prefix			?= $(HOME)
 idir			?= $(prefix)/include
 ddir			?= $(prefix)/share/$(package)
@@ -115,7 +115,7 @@ test_crchash: $(test_crchash_objs) $(test_crchash_deps)
 test_crchash.o: crc.h crc_alltables.h
 
 mod_alltables	= crc_alltables.c crc_alltables.h
-$(mod_alltables): mkcrctab.sh
+$(mod_alltables): mkcrctab.sh crctables.dat
 	mkcrctab.sh 
 toclean			+= $(mod_alltables)
 
